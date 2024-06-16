@@ -5,6 +5,7 @@ require('dotenv').config();
 const aedes = require('aedes')();
 const async = require('async');
 const { CronJob } = require('cron');
+const net = require('net');
 const http = require('http');
 const ws = require('websocket-stream');
 const app = require('../src/app');
@@ -74,11 +75,16 @@ function onListening() {
 // Create MQTT Server
 
 if (process.env.MQTT_HOST) {
-  const mqttServer = http.createServer();
-  ws.createServer({ server: mqttServer }, aedes.handle);
+  const mqttServer = net.createServer(aedes.handle);
+  mqttServer.listen(process.env.MQTT_PORT || 1883, () => {
+    console.log(`MQTT websocket server listening on port ${process.env.MQTT_PORT || 1883}`);
+  });
 
-  mqttServer.listen(process.env.MQTT_PORT || 8888, () => {
-    console.log(`MQTT websocket server listening on port ${process.env.MQTT_PORT || 8888}`);
+  const mqttWsServer = http.createServer();
+  ws.createServer({ server: mqttWsServer }, aedes.handle);
+
+  mqttWsServer.listen(process.env.MQTT_WS_PORT || 8888, () => {
+    console.log(`MQTT websocket server listening on port ${process.env.MQTT_WS_PORT || 8888}`);
   });
 
   // MQTT Event Handlers
