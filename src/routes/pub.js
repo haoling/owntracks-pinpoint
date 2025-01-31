@@ -5,6 +5,7 @@ const mqtt = require('../mqtt');
 const { Device } = require('../models/Device');
 const { CardSeen } = require('../models/CardSeen');
 const { Location } = require('../models/Location');
+const { LastLocation } = require('../models/LastLocation');
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ router.post('/', userMw.one, async (req, res) => {
     const sharers = await req.User.getUsersSharingWith();
     if (!sharers.includes(req.User._id)) sharers.push(req.User._id);
     await async.eachSeries(sharers, async (sharer) => {
-      const lastLocs = await Location.getLastByUserId(sharer); // Get last location for all devices for the user
+      const lastLocs = await LastLocation.getLastByUserId(sharer); // Get last location for all devices for the user
       console.log(`Sharer ${sharer} has ${lastLocs.length} location(s) to share`)
       await async.eachSeries(lastLocs, async (lastLoc) => {
         if (lastLoc?.data) {

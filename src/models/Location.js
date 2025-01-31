@@ -1,5 +1,6 @@
 const path = require('path');
 const { Base } = require('./Base');
+const { LastLocation } = require('./LastLocation');
 
 /*
 {
@@ -26,6 +27,7 @@ class Location extends Base {
       data
     });
     await location.save();
+    await LastLocation.create(data, user, deviceId);
     return location;
   }
 
